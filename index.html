@@ -978,3 +978,23 @@
             resultsContainer.style.display = 'block';
             finalScoreElement.textContent = score;
         }
+        function restartQuiz() {
+            resultsContainer.style.display = 'none';
+            quizIntro.style.display = 'block';
+            topicSelector.value = '';
+            startButton.disabled = true;
+        }
+
+        // Handle clicks on disabled dropdown options
+        topicSelector.addEventListener('mousedown', function(e) {
+            const option = e.target.closest('option');
+            if (option && option.disabled && option.value) {
+                e.preventDefault();
+                this.blur();
+                showUpgradeModal();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
