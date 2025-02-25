@@ -3,20 +3,978 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Speed Test Topic Selector</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Physics Quiz Speed Test</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .quiz-intro {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .topic-selection {
+            margin: 20px 0;
+        }
+
+        .topic-selector {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 16px;
+            color: var(--dark-color);
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .start-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .quiz-container {
+            display: none;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-count, .score {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.1s linear;
+        }
+
+        .question {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background-color: var(--light-color);
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background-color: #e3e8ec;
+            border-color: var(--primary-color);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .option.incorrect {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .restart-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .restart-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .upgrade-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upgrade-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .upgrade-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .close-upgrade {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Styling for disabled topics */
+        option.disabled {
+            color: #bdc3c7;
+            font-style: italic;
+        }
+
+        @media (min-width: 768px) {
+            .options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Physics Speed Test</h1>
-        <select id="topicSelect">
-            <option value="">Select a Topic</option>
-            <option value="https://testyourspeed.github.io/mechanics/">Mechanics</option>
-            <option value="https://testyourspeed.github.io/electromagnetism/">Electromagnetism</option>
-            <option value="https://testyourspeed.github.io/thermodynamics/">Thermodynamics</option>
-        </select>
-        <button id="goButton" disabled>Go to Test</button>
+        <header>
+            <h1>Physics Quiz Speed Test</h1>
+            <p>Test your knowledge with quick-fire physics questions!</p>
+        </header>
+
+        <div class="quiz-intro">
+            <h2>Ready to test your physics knowledge?</h2>
+            <p>Select a topic and answer 10 random questions. You have 20 seconds for each question!</p>
+            
+            <div class="topic-selection">
+                <label for="topic">Select Topic:</label>
+                <select id="topic" class="topic-selector">
+                    <option value="" disabled selected>Choose a topic...</option>
+                    <option value="mechanics">Mechanics</option>
+                    <option value="electromagnetism">Electromagnetism</option>
+                    <option value="thermodynamics">Thermodynamics</option>
+                    <option value="quantumphysics" disabled>Quantum Physics</option>
+                    <option value="relativity" disabled>Relativity</option>
+                    <option value="optics" disabled>Optics</option>
+                    <option value="nuclearphysics" disabled>Nuclear Physics</option>
+                </select>
+            </div>
+            
+            <button id="start-btn" class="start-btn" disabled>Start Quiz</button>
+        </div>
+
+        <div id="quiz-container" class="quiz-container">
+            <div class="quiz-header">
+                <div class="question-count">Question <span id="current">1</span>/<span id="total">10</span></div>
+                <div class="score">Score: <span id="score">0</span></div>
+            </div>
+            
+            <div class="timer-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+            
+            <div id="question" class="question"></div>
+            
+            <div id="options" class="options"></div>
+        </div>
+
+        <div id="results" class="results">
+            <h2>Quiz Complete!</h2>
+            <div class="score-display">Your score: <span id="final-score">0</span> out of 10</div>
+            <button id="restart-btn" class="restart-btn">Take Another Quiz</button>
+        </div>
     </div>
-    <script src="script.js"></script>
-</body>
-</html>
+
+    <div id="upgrade-modal" class="upgrade-modal">
+        <div class="upgrade-content">
+            <h2>UPGRADE TO PRO</h2>
+            <p>This topic is only available in the PRO version.</p>
+            <button id="close-upgrade" class="close-upgrade">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const topicSelector = document.getElementById('topic');
+        const startButton = document.getElementById('start-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const quizIntro = document.querySelector('.quiz-intro');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options');
+        const currentQuestionElement = document.getElementById('current');
+        const totalQuestionsElement = document.getElementById('total');
+        const scoreElement = document.getElementById('score');
+        const timerBar = document.getElementById('timer-bar');
+        const resultsContainer = document.getElementById('results');
+        const finalScoreElement = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-btn');
+        const upgradeModal = document.getElementById('upgrade-modal');
+        const closeUpgradeButton = document.getElementById('close-upgrade');
+
+        // Quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let timer;
+        let timeLeft;
+        let questions = [];
+        let answered = false;
+
+        // Question Banks
+        const questionBanks = {
+            mechanics: [
+                {
+                    question: "What is Newton's First Law of Motion?",
+                    options: [
+                        "Force equals mass times acceleration",
+                        "An object at rest stays at rest unless acted on by an external force",
+                        "For every action, there is an equal and opposite reaction",
+                        "Energy can neither be created nor destroyed"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which of the following is a vector quantity?",
+                    options: [
+                        "Mass",
+                        "Time",
+                        "Velocity",
+                        "Energy"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "The SI unit of momentum is:",
+                    options: [
+                        "kg·m/s²",
+                        "kg·m/s",
+                        "kg·m²/s",
+                        "kg·m²/s²"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "A projectile is launched at an angle of 45° to the horizontal. Ignoring air resistance, what is the path it follows?",
+                    options: [
+                        "Circular path",
+                        "Parabolic path",
+                        "Straight line",
+                        "Elliptical path"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which law explains why a car passenger feels pushed back into their seat when accelerating forward?",
+                    options: [
+                        "Newton's First Law",
+                        "Newton's Second Law",
+                        "Newton's Third Law",
+                        "Law of Conservation of Momentum"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the name of the force that acts perpendicular to the direction of motion of a rotating object?",
+                    options: [
+                        "Gravitational force",
+                        "Centripetal force",
+                        "Centrifugal force",
+                        "Frictional force"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "The principle of conservation of mechanical energy applies when:",
+                    options: [
+                        "Only conservative forces do work",
+                        "Only non-conservative forces do work",
+                        "Both conservative and non-conservative forces do work",
+                        "No forces do work"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the moment of inertia of a body a measure of?",
+                    options: [
+                        "Resistance to linear motion",
+                        "Resistance to rotational motion",
+                        "Ability to conserve energy",
+                        "Ability to change shape"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which of these is an example of simple harmonic motion?",
+                    options: [
+                        "A car accelerating on a straight road",
+                        "A ball rolling down a hill",
+                        "A mass oscillating on a spring",
+                        "A satellite orbiting the Earth"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the relationship between torque (τ), moment of inertia (I), and angular acceleration (α)?",
+                    options: [
+                        "τ = I/α",
+                        "τ = Iα",
+                        "τ = I²α",
+                        "τ = α/I"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "A system where the net external force is zero will have constant:",
+                    options: [
+                        "Velocity",
+                        "Acceleration",
+                        "Momentum",
+                        "Position"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the work done when a force moves its point of application?",
+                    options: [
+                        "Force × displacement",
+                        "Force × displacement × cos(θ)",
+                        "Force × time",
+                        "Force / displacement"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "The terminal velocity of a falling object is reached when:",
+                    options: [
+                        "The object hits the ground",
+                        "The acceleration reaches maximum value",
+                        "The air resistance equals the weight of the object",
+                        "The object reaches half its maximum speed"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Kepler's third law states that:",
+                    options: [
+                        "Planets move in elliptical orbits",
+                        "A line joining a planet to the Sun sweeps out equal areas in equal times",
+                        "The square of the orbital period is proportional to the cube of the semi-major axis",
+                        "The force of gravity decreases with the square of distance"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "In a perfectly elastic collision between two objects:",
+                    options: [
+                        "Kinetic energy is always lost",
+                        "Momentum is conserved but kinetic energy is not",
+                        "Both momentum and kinetic energy are conserved",
+                        "Neither momentum nor kinetic energy is conserved"
+                    ],
+                    answer: 2
+                }
+            ],
+            electromagnetism: [
+                {
+                    question: "What is Coulomb's Law used to calculate?",
+                    options: [
+                        "Magnetic force between two magnets",
+                        "Electric force between two charges",
+                        "Magnetic field due to current",
+                        "Electric field due to changing magnetic field"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the SI unit of electric current?",
+                    options: [
+                        "Volt",
+                        "Ohm",
+                        "Ampere",
+                        "Coulomb"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Which law states that the induced electromotive force is equal to the rate of change of magnetic flux?",
+                    options: [
+                        "Ampere's Law",
+                        "Faraday's Law",
+                        "Lenz's Law",
+                        "Coulomb's Law"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "When a wire carrying current is placed in a magnetic field, it experiences a force. This is the principle of:",
+                    options: [
+                        "Electric motors",
+                        "Electric generators",
+                        "Transformers",
+                        "Capacitors"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What does Gauss's Law for electricity describe?",
+                    options: [
+                        "The relationship between electric field and electric flux",
+                        "The relationship between electric field and magnetic field",
+                        "The behavior of electrons in a conductor",
+                        "The behavior of light in an electric field"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "Which of these materials has the highest electrical resistivity?",
+                    options: [
+                        "Silver",
+                        "Copper",
+                        "Aluminum",
+                        "Glass"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "What is the function of a capacitor in an electrical circuit?",
+                    options: [
+                        "To amplify voltage",
+                        "To store electrical energy",
+                        "To reduce current flow",
+                        "To generate electricity"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which phenomenon explains the behavior of light as both a particle and a wave?",
+                    options: [
+                        "Photoelectric effect",
+                        "Wave-particle duality",
+                        "Electromagnetic induction",
+                        "Quantum entanglement"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What happens to the electric field inside a hollow conductor?",
+                    options: [
+                        "It increases linearly with distance from the center",
+                        "It decreases linearly with distance from the center",
+                        "It is constant",
+                        "It is zero"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "Which law states that the total current into a junction equals the total current out of the junction?",
+                    options: [
+                        "Ohm's Law",
+                        "Kirchhoff's Current Law",
+                        "Kirchhoff's Voltage Law",
+                        "Ampere's Law"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What does an inductor oppose in an electrical circuit?",
+                    options: [
+                        "Voltage",
+                        "Resistance",
+                        "Change in current",
+                        "Capacitance"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Maxwell's equations are a set of four equations that describe:",
+                    options: [
+                        "Quantum mechanics",
+                        "Electromagnetism",
+                        "Thermodynamics",
+                        "Relativity"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "In an RLC circuit at resonance, what is the relationship between inductive reactance and capacitive reactance?",
+                    options: [
+                        "XL > XC",
+                        "XL < XC",
+                        "XL = XC",
+                        "XL × XC = R"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "The magnetic field lines around a straight current-carrying wire form:",
+                    options: [
+                        "Straight lines parallel to the wire",
+                        "Concentric circles around the wire",
+                        "Radial lines outward from the wire",
+                        "Elliptical paths around the wire"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the SI unit of electric potential?",
+                    options: [
+                        "Ampere",
+                        "Ohm",
+                        "Volt",
+                        "Watt"
+                    ],
+                    answer: 2
+                }
+            ],
+            thermodynamics: [
+                {
+                    question: "What is the zeroth law of thermodynamics about?",
+                    options: [
+                        "Conservation of energy",
+                        "Entropy increase",
+                        "Thermal equilibrium",
+                        "Absolute zero temperature"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Which thermodynamic process occurs at constant temperature?",
+                    options: [
+                        "Adiabatic",
+                        "Isobaric",
+                        "Isochoric",
+                        "Isothermal"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "What is the first law of thermodynamics essentially a statement of?",
+                    options: [
+                        "Conservation of energy",
+                        "Increase of entropy",
+                        "Thermal equilibrium",
+                        "Heat transfer"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "In which process is no heat exchanged between the system and surroundings?",
+                    options: [
+                        "Isothermal",
+                        "Adiabatic",
+                        "Isobaric",
+                        "Isochoric"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is enthalpy?",
+                    options: [
+                        "The disorder of a system",
+                        "The total energy of a system",
+                        "Internal energy plus the product of pressure and volume",
+                        "The energy transferred as heat"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "The second law of thermodynamics states that:",
+                    options: [
+                        "Energy cannot be created or destroyed",
+                        "Heat cannot spontaneously flow from cold to hot bodies",
+                        "Work can be completely converted to heat",
+                        "Heat can be completely converted to work"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What happens to the entropy of an isolated system over time?",
+                    options: [
+                        "It decreases",
+                        "It increases",
+                        "It remains constant",
+                        "It oscillates"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which device operates on the Carnot cycle?",
+                    options: [
+                        "Otto engine",
+                        "Diesel engine",
+                        "Ideal heat engine",
+                        "Refrigerator"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the relation between pressure (P), volume (V), and temperature (T) for an ideal gas?",
+                    options: [
+                        "PV = nRT",
+                        "P = nRT/V",
+                        "V = nRT/P",
+                        "T = PV/nR"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the efficiency of a Carnot engine operating between temperatures T₁ and T₂?",
+                    options: [
+                        "1 - (T₁/T₂)",
+                        "1 - (T₂/T₁)",
+                        "T₁/T₂",
+                        "T₂/T₁"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which process has zero change in internal energy for an ideal gas?",
+                    options: [
+                        "Isothermal",
+                        "Adiabatic",
+                        "Isobaric",
+                        "Isochoric"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the change in entropy for a reversible process?",
+                    options: [
+                        "Positive",
+                        "Negative",
+                        "Zero",
+                        "Infinite"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "In which thermodynamic process is the volume constant?",
+                    options: [
+                        "Isothermal",
+                        "Adiabatic",
+                        "Isobaric",
+                        "Isochoric"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "The third law of thermodynamics states that:",
+                    options: [
+                        "Energy cannot be created or destroyed",
+                        "Entropy increases in a closed system",
+                        "As temperature approaches absolute zero, entropy approaches a minimum value",
+                        "Heat flows from hot to cold regions"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the formula for Gibbs free energy?",
+                    options: [
+                        "G = H - TS",
+                        "G = H + TS",
+                        "G = U - TS",
+                        "G = U + PV"
+                    ],
+                    answer: 0
+                }
+            ]
+        };
+
+        // Event Listeners
+        topicSelector.addEventListener('change', handleTopicSelection);
+        startButton.addEventListener('click', startQuiz);
+        restartButton.addEventListener('click', restartQuiz);
+        closeUpgradeButton.addEventListener('click', closeUpgradeModal);
+
+        // Disable non-clickable options
+        const disabledOptions = Array.from(topicSelector.options).filter(option => option.disabled);
+        disabledOptions.forEach(option => {
+            option.classList.add('disabled');
+            option.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                if (this.value && this.disabled) {
+                    showUpgradeModal();
+                }
+                return false;
+            });
+        });
+
+        // Functions
+        function handleTopicSelection() {
+            if (topicSelector.value) {
+                startButton.disabled = false;
+            } else {
+                startButton.disabled = true;
+            }
+        }
+
+        function showUpgradeModal() {
+            upgradeModal.style.display = 'flex';
+        }
+
+        function closeUpgradeModal() {
+            upgradeModal.style.display = 'none';
+        }
+
+        function startQuiz() {
+            // Reset quiz state
+            currentQuestion = 0;
+            score = 0;
+            scoreElement.textContent = '0';
+            
+            // Get selected topic
+            const topic = topicSelector.value;
+            
+            // Select 10 random questions from the topic
+            const allQuestions = questionBanks[topic];
+            questions = getRandomQuestions(allQuestions, 10);
+            
+            // Hide intro, show quiz
+            quizIntro.style.display = 'none';
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            
+            // Load first question
+            loadQuestion(currentQuestion);
+        }
+
+        function getRandomQuestions(questions, count) {
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                showResults();
+                return;
+            }
+            
+            answered = false;
+            const question = questions[index];
+            
+            // Update question counter
+            currentQuestionElement.textContent = index + 1;
+            totalQuestionsElement.textContent = questions.length;
+            
+            // Display question
+            questionElement.textContent = question.question;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = i;
+                optionElement.addEventListener('click', checkAnswer);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Start timer
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 20;
+            timerBar.style.width = '100%';
+            
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                const percentage = (timeLeft / 20) * 100;
+                timerBar.style.width = `${percentage}%`;
+                
+                // Color changes based on time left
+                if (percentage < 30) {
+                    timerBar.style.backgroundColor = '#e74c3c'; // Red when time is running out
+                } else if (percentage < 60) {
+                    timerBar.style.backgroundColor = '#f39c12'; // Orange when at medium
+                } else {
+                    timerBar.style.backgroundColor = '#2ecc71'; // Green when plenty of time
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    if (!answered) {
+                        // Time's up - show correct answer
+                        const correctIndex = questions[currentQuestion].answer;
+                        const options = document.querySelectorAll('.option');
+                        options.forEach(option => {
+                            const optionIndex = parseInt(option.dataset.index);
+                            if (optionIndex === correctIndex) {
+                                option.classList.add('correct');
+                            }
+                            option.classList.add('disabled');
+                        });
+                        
+                        // Move to next question after delay
+                        setTimeout(() => {
+                            currentQuestion++;
+                            loadQuestion(currentQuestion);
+                        }, 1500);
+                    }
+                }
+            }, 100);
+        }
+
+        function checkAnswer(e) {
+            if (answered) return;
+            
+            answered = true;
+            clearInterval(timer);
+            
+            const selectedOption = e.target;
+            const selectedIndex = parseInt(selectedOption.dataset.index);
+            const correctIndex = questions[currentQuestion].answer;
+            
+            // Disable all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            // Check if answer is correct
+            if (selectedIndex === correctIndex) {
+                selectedOption.classList.add('correct');
+                score++;
+                scoreElement.textContent = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Show correct answer
+                options[correctIndex].classList.add('correct');
+            }
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            }, 1500);
+        }
+
+        function showResults() {
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            finalScoreElement.textContent = score;
+        }
